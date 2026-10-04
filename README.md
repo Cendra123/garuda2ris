@@ -1,4 +1,4 @@
-# garuda2ris
+# GARUDA CRAWLER (garuda2ris)
 
 **Mengambil hasil pencarian Garuda (Garba Rujukan Digital) dan menyimpannya
 sebagai berkas `.ris` untuk Zotero, Mendeley, EndNote, Rayyan, dan Covidence.**
@@ -266,7 +266,7 @@ kumpulan artikel dalam kajian literatur, mohon disitasi:
 
 ```bibtex
 @software{putra_priya_garuda2ris_2026,
-  author  = {Putra, Cendra Devayana and Priya, Bartolomeus},
+  author  = {Putra, Cendra Devayana and Widada, Bartolomeus Priya Perkasa Utama },
   title   = {garuda2ris: Crawl Garuda (Garba Rujukan Digital) search results into RIS},
   year    = {2026},
   version = {0.2.0},
