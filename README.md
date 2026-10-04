@@ -23,13 +23,13 @@ If you use it in your research, please [cite it](#citation).
 ## Install
 
 ```bash
-pip install git+https://github.com/YOUR-USERNAME/garuda2ris.git
+pip install git+https://github.com/Cendra123/garuda2ris.git
 ```
 
 or from a copy of this repository:
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/garuda2ris.git
+git clone https://github.com/Cendra123/garuda2ris.git
 pip install ./garuda2ris
 ```
 
@@ -211,7 +211,7 @@ literature review, please cite it:
 
 > Putra, C. D. (2026). *garuda2ris: Crawl Garuda (Garba Rujukan Digital) search
 > results into RIS* (Version 0.2.0) [Computer software].
-> https://github.com/YOUR-USERNAME/garuda2ris
+> https://github.com/Cendra123/garuda2ris
 
 ```bibtex
 @software{putra_garuda2ris_2026,
@@ -219,7 +219,7 @@ literature review, please cite it:
   title   = {garuda2ris: Crawl Garuda (Garba Rujukan Digital) search results into RIS},
   year    = {2026},
   version = {0.2.0},
-  url     = {https://github.com/YOUR-USERNAME/garuda2ris}
+  url     = {https://github.com/Cendra123/garuda2ris}
 }
 ```
 
