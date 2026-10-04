@@ -9,7 +9,7 @@ description = "Crawl Garuda (Garba Rujukan Digital) search results and export th
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
-authors = [{ name = "Cendra Devayana Putra" }]
+authors = [{ name = "Cendra Devayana Putra" }, { name = "Bartolomeus Priya" }]
 keywords = ["garuda", "ris", "bibliography", "systematic review", "indonesia"]
 dependencies = [
     "requests>=2.25",
@@ -17,8 +17,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/YOUR-USERNAME/garuda2ris"
-Issues = "https://github.com/YOUR-USERNAME/garuda2ris/issues"
+Homepage = "https://github.com/Cendra123/garuda2ris"
+Issues = "https://github.com/Cendra123/garuda2ris/issues"
 
 [project.optional-dependencies]
 test = ["pytest", "rispy"]

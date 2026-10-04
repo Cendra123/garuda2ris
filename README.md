@@ -1,221 +1,272 @@
 # garuda2ris
 
-**Crawl Garuda (Garba Rujukan Digital) search results into `.ris` files for
-Zotero, Mendeley, EndNote, Rayyan and Covidence.**
+**Mengambil hasil pencarian Garuda (Garba Rujukan Digital) dan menyimpannya
+sebagai berkas `.ris` untuk Zotero, Mendeley, EndNote, Rayyan, dan Covidence.**
 
-[Garuda](https://garuda.kemdiktisaintek.go.id) is Indonesia's national index of
-scholarly publications. It only offers RIS export one record at a time, from
-each record's detail page, which makes it hard to use as a source in a
-systematic literature review. `garuda2ris` walks all result pages of a search
-and writes one file, with the abstract of every record.
+[Garuda](https://garuda.kemdiktisaintek.go.id) adalah indeks nasional publikasi
+ilmiah Indonesia. Garuda hanya menyediakan ekspor RIS satu per satu, dari
+halaman detail tiap artikel, sehingga sulit dipakai sebagai sumber dalam kajian
+literatur sistematis. `garuda2ris` menelusuri seluruh halaman hasil sebuah
+pencarian dan menuliskannya ke satu berkas, lengkap dengan abstrak tiap entri.
 
-- Python library and command-line tool
-- Takes search words or a search URL copied from the browser
-- Rewrites queries that Garuda's search box misreads (`smoke-free` *excludes*
-  "free"; quotes are ignored)
-- Checks every page against the search it asked for, so stale pages are not saved
-- Merges records Garuda lists twice, and pulls keywords out of abstracts
-- A ready-made notebook for multi-query reviews with a PRISMA-style search log:
-  [`examples/garuda_search_G1-G10.ipynb`](examples/garuda_search_G1-G10.ipynb)
+- Pustaka Python sekaligus perintah terminal
+- Menerima kata kunci pencarian atau URL pencarian yang disalin dari peramban
+- Menulis ulang kueri yang salah dibaca oleh kotak pencarian Garuda
+  (`smoke-free` justru *mengecualikan* kata "free"; tanda kutip diabaikan)
+- Memeriksa setiap halaman terhadap pencarian yang diminta, sehingga halaman
+  usang tidak ikut tersimpan
+- Menggabungkan entri yang tercantum dua kali di Garuda dan mengambil kata
+  kunci dari abstrak
+- Notebook siap pakai untuk menjalankan beberapa pencarian sekaligus,
+  menggabungkan hasilnya, dan mencatat log pencarian ala PRISMA:
+  [`examples/garuda_multi_query.ipynb`](examples/garuda_multi_query.ipynb)
 
-If you use it in your research, please [cite it](#citation).
+Jika Anda memakainya dalam penelitian, mohon [disitasi](#sitasi).
+Jika kode tidak berjalan, silakan
+[hubungi Cendra Devayana Putra](#jika-kode-tidak-berjalan).
 
-## Install
+*English version: [README.en.md](README.en.md)*
+
+## Instalasi
 
 ```bash
 pip install git+https://github.com/Cendra123/garuda2ris.git
 ```
 
-or from a copy of this repository:
+atau dari salinan repositori ini:
 
 ```bash
 git clone https://github.com/Cendra123/garuda2ris.git
 pip install ./garuda2ris
 ```
 
-Needs Python 3.9+, `requests` and `beautifulsoup4` (installed automatically).
+Membutuhkan Python 3.9 ke atas, `requests`, dan `beautifulsoup4` (terpasang
+otomatis).
 
-## Command line
+## Penggunaan lewat terminal
 
-Paste the URL of a search you set up in the browser:
-
-```bash
-garuda2ris "https://garuda.kemdiktisaintek.go.id/documents?q=%20Smoke-Free%20Area%20Policy&select=abstract&pub=&pdf=" -o smoke_free.ris
-```
-
-or give the search words directly:
+Tuliskan kata kunci dan kolom yang ingin dicari. Contohnya, semua artikel yang
+tercantum di Garuda atas nama seorang penulis:
 
 ```bash
-garuda2ris "smoke free area policy" --field abstract -o smoke_free.ris
-garuda2ris "kawasan tanpa rokok" --field title --year-from 2018 --dedupe --keywords -o ktr.ris
+garuda2ris "Cendra Devayana Putra" --field author -o cendra.ris
+garuda2ris "Bartolomeus Priya" --field author -o bartolomeus.ris
 ```
 
-## How Garuda reads a query (important)
+Program menampilkan kemajuan halaman demi halaman, lalu menutup dengan jumlah
+entri yang ditulis beserta jumlah yang dilaporkan Garuda, sehingga Anda tahu
+hasilnya lengkap. (Pada 4 Oktober 2026 Garuda mencantumkan 16 entri untuk
+pencarian pertama.)
 
-Measured on the live site in October 2026:
+Tambahkan penyaring dan perapian sesuai kebutuhan:
 
-| You type | What Garuda does |
+```bash
+garuda2ris "Cendra Devayana Putra" --field author --year-from 2025 --dedupe --keywords -o cendra_2025.ris
+```
+
+Atau tempelkan URL pencarian yang sudah Anda atur di peramban:
+
+```bash
+garuda2ris "https://garuda.kemdiktisaintek.go.id/documents?q=Cendra+Devayana+Putra&select=author" -o cendra.ris
+```
+
+| Opsi | Fungsi |
 | --- | --- |
-| `kawasan tanpa rokok puskesmas` | Every word must be present, in any order. No phrase search. |
-| `"kawasan tanpa rokok"` | Quotes change nothing: `"rokok tanpa kawasan" puskesmas` returns the same 22 titles. |
-| `smoke-free hospital` | A hyphen **excludes** the next word: you get records with "smoke" and "hospital" that do **not** contain "free". |
-| `no smoking` / `non smoking` | Very short words seem to be ignored: both return the same results. |
+| `-o FILE` | Berkas keluaran (bawaan: `garuda.ris`) |
+| `-f, --field` | Kolom pencarian: `title` (bawaan), `abstract`, `author`, atau `doi` |
+| `--publisher NAME` | Kotak pencarian "Publisher" di Garuda |
+| `--raw-query` | Kirim kata kunci persis seperti diketik (lihat "Cara Garuda membaca kueri") |
+| `--year-from / --year-to` | Hanya simpan entri dalam rentang tahun ini |
+| `--drop-unknown-year` | Saat menyaring tahun, buang juga entri yang tahunnya tidak ditampilkan |
+| `--dedupe` | Gabungkan entri yang tercantum dua kali (DOI sama atau judul sama) |
+| `--keywords` | Salin daftar `Keywords: …` / `Kata kunci: …` di akhir abstrak ke kolom `KW` |
+| `--invert-names` | Tulis `Rio Dewandika Putra` sebagai `Putra, Rio Dewandika` |
+| `--native` | Pakai ekspor RIS milik Garuda untuk tiap entri (lihat di bawah) |
+| `--no-pdf-links` | Jangan sertakan tautan PDF (`L1`) |
+| `--max-pages N`, `--max-records N` | Berhenti lebih awal |
+| `--delay SEC` | Jeda antar-permintaan (bawaan: 1.0 detik) |
+| `--encoding utf-8-sig` | Tambahkan BOM, untuk EndNote lama di Windows |
 
-The hyphen rule was checked by counts in abstracts: `smoke hospital` = 242,
-`smoke free hospital` = 34, `"smoke-free" hospital` = 208 = 242 - 34.
+## Cara Garuda membaca kueri (penting)
 
-So search words given to this tool are rewritten first: hyphens between
-letters become spaces and double quotes are dropped (`"smoke-free" hospital`
-is sent as `smoke free hospital`). A leading hyphen (`rokok -elektrik`) is
-kept, so deliberate exclusion still works. Use `--raw-query`
-(`normalize=False` in Python) to send the words untouched. A pasted URL is
-never rewritten; you get a warning instead.
+Diukur pada situs Garuda, Oktober 2026:
 
-| Option | What it does |
+| Yang Anda ketik | Yang dilakukan Garuda |
 | --- | --- |
-| `-o FILE` | Output file (default `garuda.ris`) |
-| `-f, --field` | Search in `title` (default), `abstract`, `author` or `doi` |
-| `--publisher NAME` | Garuda's "Publisher" search box |
-| `--raw-query` | Send the search words exactly as typed (see "How Garuda reads a query") |
-| `--year-from / --year-to` | Keep only records in this year range |
-| `--drop-unknown-year` | With a year filter, also drop records that show no year |
-| `--dedupe` | Merge records Garuda lists twice (same DOI or same title) |
-| `--keywords` | Copy a trailing `Keywords: …` / `Kata kunci: …` list from the abstract into `KW` |
-| `--invert-names` | Write `Rio Dewandika Putra` as `Putra, Rio Dewandika` |
-| `--native` | Use Garuda's own RIS export for each record (see below) |
-| `--no-pdf-links` | Leave PDF links (`L1`) out |
-| `--max-pages N`, `--max-records N` | Stop early |
-| `--delay SEC` | Pause between requests (default 1.0) |
-| `--encoding utf-8-sig` | Add a BOM, for older EndNote on Windows |
+| `kawasan tanpa rokok puskesmas` | Semua kata harus ada, urutannya bebas. Tidak ada pencarian frasa. |
+| `"kawasan tanpa rokok"` | Tanda kutip tidak berpengaruh: `"rokok tanpa kawasan" puskesmas` menghasilkan 22 judul yang sama. |
+| `smoke-free hospital` | Tanda hubung **mengecualikan** kata sesudahnya: yang muncul adalah entri yang memuat "smoke" dan "hospital" tetapi **tidak** memuat "free". |
+| `no smoking` / `non smoking` | Kata yang sangat pendek tampaknya diabaikan: keduanya memberi hasil yang sama. |
 
-## Python
+Aturan tanda hubung diperiksa lewat jumlah hasil pada kolom abstrak:
+`smoke hospital` = 242, `smoke free hospital` = 34, dan
+`"smoke-free" hospital` = 208 = 242 − 34.
+
+Karena itu kata kunci yang diberikan ke alat ini ditulis ulang lebih dahulu:
+tanda hubung di antara huruf diganti spasi dan tanda kutip ganda dibuang
+(`"smoke-free" hospital` dikirim sebagai `smoke free hospital`). Tanda hubung
+di awal kata (`rokok -elektrik`) dibiarkan, sehingga pengecualian yang
+disengaja tetap berfungsi. Gunakan `--raw-query` (`normalize=False` di Python)
+untuk mengirim kata kunci apa adanya. URL yang ditempel tidak pernah ditulis
+ulang; Anda hanya mendapat peringatan.
+
+## Penggunaan di Python
 
 ```python
 from garuda2ris import crawl, crawl_to_ris, write_ris
 
-# one call
-crawl_to_ris("smoke free area policy", "smoke_free.ris", field="abstract")
+# satu panggilan
+crawl_to_ris("Cendra Devayana Putra", "cendra.ris", field="author")
 
-# or keep the records and work with them
-articles = crawl(
-    "https://garuda.kemdiktisaintek.go.id/documents?q=%20Smoke-Free%20Area%20Policy&select=abstract",
-    remove_duplicates=True,
-    keywords=True,
-)
+# atau simpan entrinya dan olah lebih lanjut
+articles = crawl("Cendra Devayana Putra", field="author", remove_duplicates=True, keywords=True)
+articles += crawl("Bartolomeus Priya", field="author")
+
 for a in articles[:3]:
     print(a.year, a.journal, "-", a.title)
 
-recent = [a for a in articles if a.year and a.year >= 2020]
-write_ris(recent, "smoke_free_2020plus.ris")
+recent = [a for a in articles if a.year and a.year >= 2025]
+write_ris(recent, "cendra_bartolomeus_2025plus.ris")
 
-import pandas as pd                      # optional: a screening spreadsheet
-pd.DataFrame(a.to_dict() for a in articles).to_excel("screening.xlsx", index=False)
+import pandas as pd                      # opsional: tabel seluruh entri
+pd.DataFrame(a.to_dict() for a in articles).to_excel("publications.xlsx", index=False)
 ```
 
-Lower level:
+Tingkat yang lebih rendah:
 
 ```python
-from garuda2ris import GarudaClient, parse_search_page, to_ris
+from garuda2ris import GarudaClient
 
 client = GarudaClient(delay=2.0)
-for article in client.search("stunting", field="title", max_pages=3):
-    ...
-page = client.fetch_page({"q": "stunting", "select": "title"}, page=2)
+for article in client.search("Bartolomeus Priya", field="author", max_pages=3):
+    print(article.title, article.authors)
+
+page = client.fetch_page({"q": "Cendra Devayana Putra", "select": "author"}, page=2)
 print(page.total_records, page.total_pages)
 ```
 
-## What ends up in the RIS file
+Contoh lengkap ada di [`examples/author_search.py`](examples/author_search.py).
 
-| RIS tag | Source on Garuda |
+## Isi berkas RIS
+
+| Tag RIS | Sumber di Garuda |
 | --- | --- |
-| `TY` | `JOUR`; `CONF` when the venue name says conference / proceeding / prosiding / seminar |
-| `TI` | Title |
-| `AU` | One per author, placeholder junk removed (`Minollah -` → `Minollah`) |
-| `T2`, `JF` | Journal name |
-| `VL`, `IS`, `PY` | Parsed from the "Vol 16, No 4 (2025): …" line |
-| `PB` | Publisher |
+| `TY` | `JOUR`; `CONF` bila nama terbitan memuat conference / proceeding / prosiding / seminar |
+| `TI` | Judul |
+| `AU` | Satu baris per penulis, sisa pengisian yang tidak perlu dibuang (`Minollah -` → `Minollah`) |
+| `T2`, `JF` | Nama jurnal |
+| `VL`, `IS`, `PY` | Diurai dari baris "Vol 16, No 4 (2025): …" |
+| `PB` | Penerbit |
 | `DO` | DOI |
-| `AB` | Abstract |
-| `KW` | Only with `--keywords` |
-| `UR` | "Original Source" link (the Garuda page if there is none) |
-| `L1` | "Download Original" and Garuda "Full PDF" links |
-| `L2` | The record's Garuda page |
-| `AN`, `ID`, `DB` | Garuda record ID, database name |
+| `AB` | Abstrak |
+| `KW` | Hanya dengan `--keywords` |
+| `UR` | Tautan "Original Source" (halaman Garuda bila tidak ada) |
+| `L1` | Tautan "Download Original" dan "Full PDF" milik Garuda |
+| `L2` | Halaman entri tersebut di Garuda |
+| `AN`, `ID`, `DB` | ID entri di Garuda, nama pangkalan data |
 
-Fields Garuda does not show are left out; nothing is guessed. Garuda's listing
-has no page numbers, ISSN or publication date.
+Kolom yang tidak ditampilkan Garuda tidak diisi; tidak ada yang ditebak.
+Daftar hasil Garuda tidak memuat nomor halaman, ISSN, maupun tanggal terbit.
 
-## How it works
+## Cara kerja
 
-1. Request `/documents?page=N&q=…&select=…` for N = 1, 2, … (10 records per page).
-2. Read "Page X of Y | Total Record : N" to know when to stop. It also stops
-   if a page brings no new records.
-3. For each record, find the title link (`/documents/detail/<id>`), the author
-   links (`/author/view/<id>`), the `doi.org` link, the labelled action links,
-   the "Publisher :" line and the journal line above it, and the abstract.
-4. Write the records as RIS (UTF-8, CRLF line endings).
+1. Meminta `/documents?page=N&q=…&select=…` untuk N = 1, 2, … (10 entri per
+   halaman).
+2. Membaca "Page X of Y | Total Record : N" untuk mengetahui kapan berhenti.
+   Program juga berhenti bila sebuah halaman tidak membawa entri baru.
+3. Untuk tiap entri, mencari tautan judul (`/documents/detail/<id>`), tautan
+   penulis (`/author/view/<id>`), tautan `doi.org`, tautan aksi yang berlabel,
+   baris "Publisher :" dan baris jurnal di atasnya, serta abstrak.
+4. Menulis entri sebagai RIS (UTF-8, akhir baris CRLF).
 
-The parser keys on those link patterns and labels, not on CSS class names, so
-a restyle of the site should not break it.
+Pengurai berpegang pada pola tautan dan label tersebut, bukan pada nama kelas
+CSS, sehingga perubahan tampilan situs semestinya tidak merusaknya.
 
-### Stale pages
+### Halaman usang
 
-Garuda's `/documents` address sometimes answers with a leftover page from a
-different search or a different page number. Every answer is therefore
-checked against Garuda's own "Search *query*, by *field*" line and its
-"Page X of Y" line. A wrong answer is fetched again from the equivalent
-address `/documents/index/<token>`, which is then used for the rest of the
-run. If that is wrong too, the search stops with `GarudaMismatch` instead of
-saving records that belong to another search.
+Alamat `/documents` di Garuda kadang menjawab dengan halaman sisa dari
+pencarian lain atau nomor halaman lain. Karena itu setiap jawaban dicocokkan
+dengan baris "Search *kueri*, by *kolom*" dan baris "Page X of Y" milik Garuda
+sendiri. Jawaban yang salah diambil ulang dari alamat setara
+`/documents/index/<token>`, yang kemudian dipakai sampai proses selesai. Bila
+masih salah, pencarian dihentikan dengan `GarudaMismatch` alih-alih menyimpan
+entri milik pencarian lain.
 
 ### `--native`
 
-Each record's detail page has an "RIS" button
-(`/citation/site/RIS/<id>`). With `--native` the file is assembled from those
-official exports, adding the abstract and DOI from the listing when the export
-lacks them. It costs one extra request per record, and any record whose export
-cannot be fetched falls back to the record built from the listing.
+Halaman detail tiap entri memiliki tombol "RIS"
+(`/citation/site/RIS/<id>`). Dengan `--native`, berkas disusun dari ekspor
+resmi tersebut, ditambah abstrak dan DOI dari daftar hasil bila ekspornya
+tidak memuatnya. Cara ini memerlukan satu permintaan tambahan per entri, dan
+entri yang ekspornya gagal diambil akan memakai data dari daftar hasil.
 
-## Limits and notes
+## Batasan dan catatan
 
-- **Year filter is applied after download**, using the year parsed from each
-  record. If you prefer Garuda's own "Filter By Year", set it in the browser
-  and paste the resulting URL: all URL parameters are passed through unchanged.
-- **Duplicates are common.** Garuda re-indexes journals, so the same paper can
-  appear under two IDs. Use `--dedupe`, or let your reference manager do it.
-- **Metadata is as good as the journal's OJS data.** Expect things like
-  `Tukiman, MKM` (a degree in the name field) or a DOI containing spaces.
-- **Author name order** is kept as Garuda shows it. `--invert-names` treats the
-  last word as the family name, which is wrong for many Indonesian names.
-- Be gentle: keep `--delay` at 1 second or more.
-- If Garuda changes domain again, pass `--base-url` (or just paste a URL from
-  the new domain).
-- Behind a proxy or custom CA, pass your own session:
+- **Penyaring tahun diterapkan setelah pengunduhan**, memakai tahun yang
+  diurai dari tiap entri. Bila ingin memakai "Filter By Year" milik Garuda,
+  atur di peramban lalu tempelkan URL-nya: semua parameter URL diteruskan apa
+  adanya.
+- **Duplikat sering muncul.** Garuda mengindeks ulang jurnal, sehingga artikel
+  yang sama bisa tercantum dengan dua ID. Gunakan `--dedupe`, atau biarkan
+  pengelola referensi Anda yang menanganinya.
+- **Mutu metadata mengikuti data OJS jurnalnya.** Wajar bila menemukan
+  `Tukiman, MKM` (gelar di kolom nama) atau DOI yang memuat spasi.
+- **Urutan nama penulis** dipertahankan seperti di Garuda. `--invert-names`
+  menganggap kata terakhir sebagai nama keluarga, yang keliru untuk banyak
+  nama Indonesia.
+- Jaga jeda `--delay` minimal 1 detik.
+- Bila Garuda berganti domain lagi, gunakan `--base-url` (atau cukup tempelkan
+  URL dari domain baru).
+- Di balik proxy atau CA khusus, berikan sesi Anda sendiri:
   `GarudaClient(session=my_requests_session)`.
 
-## Tests
+## Jika kode tidak berjalan
+
+Jika `garuda2ris` tidak berjalan sebagaimana mestinya, silakan hubungi
+**Cendra Devayana Putra**:
+
+- buka *issue* di <https://github.com/Cendra123/garuda2ris/issues>, atau
+- hubungi lewat profil GitHub [@Cendra123](https://github.com/Cendra123).
+
+Agar masalah cepat ditemukan, mohon sertakan:
+
+- perintah atau kueri yang dijalankan,
+- pesan galat selengkapnya,
+- keluaran `garuda2ris --version` dan versi Python Anda,
+- tanggal pencarian dilakukan.
+
+Sebelum melapor, beberapa hal ini layak dicoba:
+
+| Gejala | Yang bisa dicoba |
+| --- | --- |
+| `GarudaMismatch` | Garuda mengirim halaman yang salah. Tunggu beberapa menit lalu jalankan lagi. |
+| Galat koneksi atau `HTTP 5xx` | Periksa apakah situs Garuda bisa dibuka di peramban; situsnya kadang tidak dapat diakses. |
+| Jumlah entri lebih sedikit daripada yang dilaporkan Garuda | Jalankan ulang; bila tetap terjadi, laporkan beserta kuerinya. |
+| Hasil kosong padahal di peramban ada | Garuda mungkin mengubah tampilan atau alamatnya. Laporkan agar pengurai diperbarui. |
+
+## Pengujian
 
 ```bash
 pip install pytest rispy
 pytest
 ```
 
-The HTML files in `tests/fixtures/` are hand-built stand-ins for Garuda result
-pages (two deliberately different layouts) filled with real records from the
-live listing; they are not captured pages.
+Berkas HTML di `tests/fixtures/` adalah tiruan halaman hasil Garuda yang dibuat
+tangan (dua tata letak yang sengaja dibuat berbeda) dan diisi entri nyata dari
+daftar hasil; berkas tersebut bukan halaman yang direkam langsung.
 
-## Citation
+## Sitasi
 
-If this software helps your work, for example to build the search set of a
-literature review, please cite it:
+Jika perangkat lunak ini membantu pekerjaan Anda, misalnya untuk menyusun
+kumpulan artikel dalam kajian literatur, mohon disitasi:
 
-> Putra, C. D. (2026). *garuda2ris: Crawl Garuda (Garba Rujukan Digital) search
-> results into RIS* (Version 0.2.0) [Computer software].
+> Putra, C. D., & Priya, B. (2026). *garuda2ris: Crawl Garuda (Garba Rujukan
+> Digital) search results into RIS* (Version 0.2.0) [Computer software].
 > https://github.com/Cendra123/garuda2ris
 
 ```bibtex
-@software{putra_garuda2ris_2026,
-  author  = {Putra, Cendra Devayana},
+@software{putra_priya_garuda2ris_2026,
+  author  = {Putra, Cendra Devayana and Priya, Bartolomeus},
   title   = {garuda2ris: Crawl Garuda (Garba Rujukan Digital) search results into RIS},
   year    = {2026},
   version = {0.2.0},
@@ -223,19 +274,19 @@ literature review, please cite it:
 }
 ```
 
-GitHub also offers these under **Cite this repository** in the sidebar (it
-reads [`CITATION.cff`](CITATION.cff)).
+GitHub juga menyediakan kedua format ini lewat tombol **Cite this repository**
+di bilah samping (dibaca dari [`CITATION.cff`](CITATION.cff)).
 
-Please also name Garuda itself as the data source in your methods section,
-with the date you ran each search.
+Mohon sebutkan juga Garuda sebagai sumber data pada bagian metode, beserta
+tanggal tiap pencarian dijalankan.
 
-## Responsible use
+## Penggunaan yang bertanggung jawab
 
-Garuda is a public service run by the Indonesian ministry responsible for
-higher education. Keep the delay between requests at one second or more, do
-not run searches in parallel, and use the data for research and reference
-management.
+Garuda adalah layanan publik yang dikelola kementerian yang membidangi
+pendidikan tinggi. Jaga jeda antar-permintaan minimal satu detik, jangan
+menjalankan pencarian secara paralel, dan gunakan datanya untuk penelitian
+serta pengelolaan referensi.
 
-## License
+## Lisensi
 
-MIT. See [LICENSE](LICENSE).
+MIT. Lihat [LICENSE](LICENSE).

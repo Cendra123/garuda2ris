@@ -13,10 +13,20 @@ from .client import SEARCH_FIELDS, GarudaClient, GarudaError
 from .parser import DEFAULT_BASE_URL
 
 
+HELP_CONTACT = (
+    "If this keeps happening, please contact Cendra Devayana Putra: "
+    "https://github.com/Cendra123/garuda2ris/issues\n"
+    "Jika masalah ini terus terjadi, silakan hubungi Cendra Devayana Putra "
+    "melalui alamat di atas."
+)
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="garuda2ris",
         description="Crawl a Garuda (Garba Rujukan Digital) search and save it as .ris",
+        epilog="Not working? Contact Cendra Devayana Putra: "
+               "https://github.com/Cendra123/garuda2ris/issues",
     )
     p.add_argument("query", help="search words, or a full Garuda search URL copied from the browser")
     p.add_argument("-o", "--output", default="garuda.ris", help="output file (default: garuda.ris)")
@@ -80,6 +90,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         )
     except GarudaError as exc:
         print(f"error: {exc}", file=sys.stderr)
+        print(HELP_CONTACT, file=sys.stderr)
         return 1
     total = client.total_records
     reported = f" (Garuda reports {total} for this search)" if total is not None else ""

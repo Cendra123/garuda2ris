@@ -158,3 +158,14 @@ def test_cli(tmp_path, monkeypatch, capsys):
     assert out.read_text(encoding="utf-8").count("TY  - JOUR") == 3
     assert "wrote 3 records" in capsys.readouterr().err
     assert dict(session.calls[0][1])["select"] == "abstract"
+
+
+def test_cli_failure_tells_the_user_whom_to_contact(tmp_path, monkeypatch, capsys):
+    session = FakeSession(lambda url, params: FakeResponse(status_code=404))
+    monkeypatch.setattr("garuda2ris.client.requests.Session", lambda: session)
+    out = tmp_path / "none.ris"
+    code = main(["x", "-o", str(out), "--delay", "0", "-q"])
+    err = capsys.readouterr().err
+    assert code == 1 and not out.exists()
+    assert "HTTP 404" in err
+    assert "Cendra Devayana Putra" in err and "github.com/Cendra123/garuda2ris/issues" in err
