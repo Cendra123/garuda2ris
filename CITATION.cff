@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+type: software
+title: "garuda2ris: Crawl Garuda (Garba Rujukan Digital) search results into RIS"
+abstract: >-
+  garuda2ris is a Python library and command-line tool that crawls search
+  results from Garuda (Garba Rujukan Digital), Indonesia's national index of
+  scholarly publications, and exports them as RIS files for Zotero, Mendeley,
+  EndNote, Rayyan and Covidence. It walks all result pages of a search,
+  rewrites queries that Garuda's search box misreads, detects stale result
+  pages, merges duplicate records and keeps a search log for systematic
+  literature reviews.
+authors:
+  - family-names: Putra
+    given-names: Cendra Devayana
+    affiliation: Universitas Negeri Surabaya
+    # orcid: "https://orcid.org/0000-0000-0000-0000"
+version: 0.2.0
+date-released: "2026-10-04"
+license: MIT
+repository-code: "https://github.com/YOUR-USERNAME/garuda2ris"
+url: "https://github.com/YOUR-USERNAME/garuda2ris"
+# doi: 10.5281/zenodo.XXXXXXX
+keywords:
+  - Garuda
+  - Garba Rujukan Digital
+  - RIS
+  - systematic literature review
+  - bibliographic data
+  - reference management
+  - web scraping
+  - Indonesia
