@@ -15,15 +15,15 @@ authors:
     given-names: Cendra Devayana
     affiliation: Universitas Negeri Surabaya
     # orcid: "https://orcid.org/0000-0000-0000-0000"
-  - family-names: Priya
-    given-names: Bartolomeus
+  - family-names: Widada
+    given-names: Bartolomeus Priya Perkasa Utama 
     # orcid: "https://orcid.org/0000-0000-0000-0000"
 version: 0.2.0
 date-released: "2026-10-04"
 license: MIT
 repository-code: "https://github.com/Cendra123/garuda2ris"
 url: "https://github.com/Cendra123/garuda2ris"
-# doi: 10.5281/zenodo.XXXXXXX
+doi: 10.5281/zenodo.23139269
 keywords:
   - Garuda
   - Garba Rujukan Digital
